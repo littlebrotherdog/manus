@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Flow Tool Service",
+    "text": "super-agent 提供 FlowToolcallAgent 通过 tool_service_flow_id 调用多轮工具链，并在 flow_trace 中记录 trace_id、tool_status 与 meta。",
+    "source": "super_agent/agents/flow_agent.py"
+  },
+  {
+    "title": "Browser Session",
+    "text": "BrowserSession 使用 browser-use 镜像，支持代理参数、超时与 pod 状态检查，可结合 plan_component 进行网页操作。",
+    "source": "agents/tools/components"
+  },
+  {
+    "title": "Weave Eval",
+    "text": "eval/weave_eval.py 解析 YAML，将 GAIA、TauBench、OpenManus 等任务分发到 worker，并联动 scorer、server 前后端。",
+    "source": "eval/weave_eval.py"
+  },
+  {
+    "title": "Data Scripts",
+    "text": "scripts/prepare_toolcall_data.py、rollout_plan_data.py 等脚本处理标签、persona、trace-analyzer，维持大批量训练数据。",
+    "source": "scripts/"
+  },
+  {
+    "title": "Model API",
+    "text": "utils/model_api.py 统一封装 Model Proxy、StepCast、Anthropic 客户端，加入 tenacity 重试与速率控制。",
+    "source": "super_agent/utils/model_api.py"
+  }
+]

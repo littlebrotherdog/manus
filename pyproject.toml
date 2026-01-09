@@ -1,0 +1,30 @@
+[project]
+name = "manus"
+version = "0.1.0"
+description = "Lightweight agent runtime distilled from super-agent"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27.2",
+    "pydantic>=2.10.0",
+    "typer>=0.15.0",
+    "rich>=13.9.2",
+    "pytest>=8.3.3",
+    "streamlit>=1.39.0"
+]
+
+[project.scripts]
+manus = "manus.cli:app"
+
+[tool.uv]
+package = true
+link-mode = "copy"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["manus*"]
+
+[tool.setuptools.package-data]
+"manus.data" = ["seed_documents.json"]

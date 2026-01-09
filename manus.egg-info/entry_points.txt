@@ -1,0 +1,2 @@
+[console_scripts]
+manus = manus.cli:app
