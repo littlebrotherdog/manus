@@ -17,7 +17,7 @@
 | 配置层 | `manus/config.py` | `LLMConfig`、`ManusSettings`，集中管理 base_url、API Key、默认工具。 |
 | LLM 层 | `manus/llm/` | `HttpLLMClient` 基于 OpenAI-compatible `/chat/completions` 接口。 |
 | Agent 层 | `manus/agents/` | `PlanBuilder`、`ManusAgent`、数据类型（Plan、PlanStep、AgentEvent）。 |
-| 工具层 | `manus/tools/` | `ToolRegistry` 与默认工具（LocalSearch、Calculator）。 |
+| 工具层 | `manus/tools/` | `ToolRegistry`、LocalSearch、Calculator 以及 Functools 组件提供的天气/搜索/Python 等工具集合。 |
 | 记忆层 | `manus/memory/` | `MemoryStore` 记录工具输出，供总结阶段读取。 |
 | 数据层 | `manus/data/seed_documents.json` | 本地检索数据，可替换为企业知识。 |
 | 可视化 | `app/streamlit_app.py` | Streamlit demo，流式展示事件。 |
@@ -46,6 +46,17 @@
 3. **上下文格式**：`ToolInput` 包含 `task` 和 `context`（含原始任务、步骤号等），返回 `ToolOutput` 并附带结构化 `metadata` 便于记录。
 4. **观测**：ManusAgent 会在 `events` 中记录工具输入输出，可接驳日志/监控/Streamlit。
 
+## 内置工具扩展包
+
+`build_default_registry()` 在 `LocalSearchTool` 和 `CalculatorTool` 之外，还会调用 `register_functools_tools()` 注册以下本地工具：
+
+- **数据获取**：`get_temperature_and_windspeed`、`web_search`、`batch_search`、`google_scholar`、`get_youtube_video_summary` 等，全部基于仓库内的种子数据，保证离线可运行。
+- **执行类**：`execute_python` / `python` / `PythonInterpreter` / `execute_python_qwen3` 共用同一受限执行器，仅暴露 `print`、`range`、`sum` 等安全内建函数，并回传 `stdout` 与 `result`。
+- **文件/链接类**：`parse_file` 限制只能读取仓库根目录下的文件，若路径越界或文件缺失会抛出异常；`open_url` 则以文件名模拟页面标题。
+- **记忆与流程**：`memory`、`think`、`create_plan`、`update_plan`、`final_answer` 方便在 Prompt 内显式标注思考及总结步骤。
+
+这些工具主要用于演示与本地测试，不会真的调用外部 API；若需要接入真实服务，可以用相同的 `FunctionTool` 包装器替换具体 handler。
+
 ## 记忆策略
 
 - 默认仅保留最近 6 条工具事件，用于控制 prompt 长度。
@@ -55,7 +66,9 @@
 
 - `tests/test_plan_parser.py` 确保 `[tool: ...]` 标记解析正确。
 - `tests/test_local_search.py` 校验本地检索结果结构。
+- `tests/test_functools_tools.py` 覆盖 Functools 工具（天气、文件解析、受限 Python 执行）的核心行为。
 - 建议在新增工具时仿照上述文件创建对应测试，并引入 `pytest` fixture 提供假数据。
+- 通过 `python -m compileall manus app tests` 可以在 CI 中快速完成语法级校验。
 
 ## 路线图
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Protocol
+from typing import Any, Awaitable, Callable, Dict, Protocol
 
 @dataclass
 class ToolInput:
@@ -43,3 +43,21 @@ class ToolRegistry:
             tool = self._tools[key]
             lines.append(f"- {tool.name}: {tool.description}")
         return "\n".join(lines)
+
+
+class FunctionTool:
+    """Wraps coroutine functions into the Tool protocol."""
+
+    def __init__(
+        self,
+        *,
+        name: str,
+        description: str,
+        func: Callable[[ToolInput], Awaitable[ToolOutput]],
+    ):
+        self.name = name
+        self.description = description
+        self._func = func
+
+    async def arun(self, tool_input: ToolInput) -> ToolOutput:  # pragma: no cover - thin wrapper
+        return await self._func(tool_input)

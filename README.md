@@ -14,7 +14,7 @@ Manus 是一个极简的「规划 + 工具 + LLM」执行内核，用于快速�
 
 1. **LLM 抽象**：`manus.llm.HttpLLMClient` 基于 OpenAI-compatible 协议，包含超时、温度、最大 token 等常用参数，并支持环境变量覆盖 API Key。
 2. **规划器**：`manus.agents.planning.PlanBuilder` 通过提示词生成 2-4 步执行计划，并解析 `[tool: xxx]` 标记以绑定工具。
-3. **工具系统**：`ToolRegistry` 管理工具声明和 prompt 片段，目前内置 `search`（基于 `manus/data/seed_documents.json` 的本地检索）与 `calculator`（安全算式执行）。
+3. **工具系统**：`ToolRegistry` 管理工具声明和 prompt 片段，默认通过 Functools 组件注册天气、图片、搜索、Python 执行、文件解析、记忆等 15+ 个本地工具。
 4. **记忆与总结**：`MemoryStore` 记录每步工具结果，`ManusAgent` 会在结尾调用 LLM 将这些片段凝练成最终回答。
 5. **事件流**：执行过程中会产出 `plan`、`tool`、`final` 等事件，可直接送入日志或 UI（例如 Streamlit demo）。
 
@@ -70,6 +70,24 @@ streamlit run manus/app/streamlit_app.py
 
 界面会实时输出计划、每一步工具内容与最终回答，并在侧栏调整模型、步数、temperature。
 
+### 内置工具一览
+
+Manus 默认加载 `LocalSearchTool`、`CalculatorTool` 以及 `manus.tools.functools_component.register_functools_tools` 中的多功能工具。常见能力：
+
+| 名称 | 功能 | 说明 |
+| --- | --- | --- |
+| `search` | 本地检索 | 基于 `manus/data/seed_documents.json` 的 TF/IDF 样式检索。 |
+| `calculator` | 安全计算 | 仅允许 `+ - * / % **` 等节点，并自动提取句子里的算式。 |
+| `get_temperature_and_windspeed` | 天气查询 | 根据城市字符串生成确定性温度/风速，方便测试。 |
+| `generate_image` | 图片生成占位 | 返回 `fake-image://{seed}` 供前端展示。 |
+| `web_search`/`search`/`batch_search` | 检索 | 复用本地检索实现，满足单条或批量查询。 |
+| `parse_file` | 文件读取 | 只允许访问仓库根目录下的文件，可通过 `max_chars` 控制长度。 |
+| `execute_python` / `python` / `PythonInterpreter` | 代码执行 | 在受限内置函数环境中执行脚本，返回 `stdout` 与 `result`。 |
+| `memory` | 长期记忆 | 简单把上下文写入 `_GLOBAL_MEMORY`，可根据需要替换。 |
+| `think`/`create_plan`/`update_plan`/`final_answer` | 流程控制 | 方便在提示词里显式插入思考或总结步骤。 |
+
+所有工具都通过 `build_default_registry()` 自动注册，如需只启用子集，可创建新的 `ToolRegistry` 并手动调用 `register_functools_tools()`。
+
 ### 常用环境变量
 
 | 变量 | 默认值 | 说明 |
@@ -115,11 +133,13 @@ CLI 会依次打印计划、每步工具事件以及最终回答。
 
 ## 测试与质量
 
-- `pytest`：验证计划解析与本地检索行为。
+- `pytest`：验证计划解析、本地检索与 Functools 工具的关键路径。
+- `python -m compileall manus app tests`：快速检查整仓所有模块语法，CI/CD 可直接复用该命令。
 - 建议在新增工具时补充对应单测，并将伪造文档放入 `manus/data/`（或改用 importlib.resources），避免依赖真实外部接口。
 
 ## 文档索引
 
 - [docs/overview.md](docs/overview.md)：涵盖架构、流程、模块解读与二次开发建议。
+- 需要更细粒度的落地方案，可在 `docs/overview.md` 的「内置工具扩展包」「执行流程」章节找到建议步骤，再结合本文的「Streamlit 可视化」「测试与质量」快速验证。
 
 欢迎在此基础上添加更多工具、UI，或将 Manus 嵌入现有产品。EOF
