@@ -126,6 +126,7 @@ _TOOLS = [
     ToolSpec("get_temperature_and_windspeed", "查询指定城市的温度与风速", _tool_get_temperature),
     ToolSpec("generate_image", "根据提示生成示意图片", _tool_generate_image),
     ToolSpec("web_search", "检索本地知识库", _tool_web_search),
+    ToolSpec("qwen_search", "Qwen 搜索接口", _tool_qwen_search),
     ToolSpec("open_url", "打开链接并返回标题", _tool_open_url),
     ToolSpec("get_youtube_video_summary", "总结 YouTube 视频", _tool_youtube_summary),
     ToolSpec("google_scholar", "返回示例学术结果", _tool_google_scholar),
@@ -134,7 +135,6 @@ _TOOLS = [
     ToolSpec("python", "执行 Python 代码", _tool_python),
     ToolSpec("PythonInterpreter", "执行 Python 代码", _tool_python),
     ToolSpec("execute_python_qwen3", "执行 Python 代码", _tool_python),
-    ToolSpec("search", "Qwen 搜索接口", _tool_qwen_search),
     ToolSpec("batch_search", "批量搜索", _tool_batch_search),
     ToolSpec("memory", "写入长期记忆", _tool_memory),
     ToolSpec("think", "记录思考", _tool_think),
@@ -146,5 +146,10 @@ _TOOLS = [
 
 def register_functools_tools(registry: ToolRegistry) -> ToolRegistry:
     for spec in _TOOLS:
-        registry.register(FunctionTool(name=spec.name, description=spec.description, func=spec.handler))
+        try:
+            registry.get(spec.name)
+        except KeyError:
+            registry.register(FunctionTool(name=spec.name, description=spec.description, func=spec.handler))
+        else:  # 已存在则跳过，避免覆盖如 LocalSearch 的 search 名称
+            continue
     return registry

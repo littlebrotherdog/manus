@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import List
 
 import streamlit as st
@@ -24,11 +24,28 @@ if "history" not in st.session_state:
 
 with st.sidebar:
     st.header("运行参数")
-    default_model = st.text_input("模型 ID", value=LLMConfig().model)
-    max_steps = st.slider("最大步骤", min_value=1, max_value=6, value=3)
+    model_candidates = [
+        "deepseek-ai/DeepSeek-R1",
+        "deepseek-ai/DeepSeek-V3",
+        "Qwen/Qwen2.5-7B-Instruct",
+        "Qwen/Qwen2.5-14B-Instruct",
+        "Qwen/Qwen2.5-32B-Instruct",
+        "Qwen/Qwen2.5-72B-Instruct-128K",
+        "Qwen/Qwen2.5-Coder-32B-Instruct",
+        "Qwen/Qwen3-8B",
+        "Qwen/Qwen3-14B",
+        "Qwen/Qwen3-30B-A3B",
+        "Qwen/Qwen3-32B",
+        "Qwen/Qwen3-235B-A22B",
+        "MiniMaxAI/MiniMax-M1-80k",
+        "THUDM/GLM-4-32B-0414",
+    ]
+    selected_model = st.selectbox("模型候选", model_candidates, index=0)
+    custom_model = st.text_input("自定义模型 ID (可选)", value=selected_model)
+    default_model = custom_model.strip() or selected_model
+    max_steps = st.slider("最大步骤", min_value=1, max_value=30, value=3)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.2, step=0.05)
     st.divider()
-    st.markdown("**环境变量**: MANUS_LLM_API_KEY / MANUS_LLM_BASE_URL 可覆盖默认值。")
 
 task = st.text_area("任务输入", value="列出 Manus 的关键组件", height=120)
 run_button = st.button("运行 Manus", type="primary")
@@ -82,7 +99,7 @@ async def _run(task_text: str):
         {
             "task": task_text,
             "answer": result["answer"],
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
     )
 

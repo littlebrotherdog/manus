@@ -33,3 +33,8 @@ def test_execute_python_returns_stdout_and_result():
     output = _run("execute_python", task=code)
     assert output.metadata["result"] == 21
     assert "value 21" in output.content
+
+
+def test_qwen_search_alias_uses_local_index():
+    output = _run("qwen_search", task="FlowToolcallAgent")
+    assert output.metadata["results"]

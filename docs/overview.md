@@ -50,7 +50,7 @@
 
 `build_default_registry()` 在 `LocalSearchTool` 和 `CalculatorTool` 之外，还会调用 `register_functools_tools()` 注册以下本地工具：
 
-- **数据获取**：`get_temperature_and_windspeed`、`web_search`、`batch_search`、`google_scholar`、`get_youtube_video_summary` 等，全部基于仓库内的种子数据，保证离线可运行。
+- **数据获取**：`get_temperature_and_windspeed`、`web_search`、`qwen_search`、`batch_search`、`google_scholar`、`get_youtube_video_summary` 等，全部基于仓库内的种子数据，保证离线可运行。
 - **执行类**：`execute_python` / `python` / `PythonInterpreter` / `execute_python_qwen3` 共用同一受限执行器，仅暴露 `print`、`range`、`sum` 等安全内建函数，并回传 `stdout` 与 `result`。
 - **文件/链接类**：`parse_file` 限制只能读取仓库根目录下的文件，若路径越界或文件缺失会抛出异常；`open_url` 则以文件名模拟页面标题。
 - **记忆与流程**：`memory`、`think`、`create_plan`、`update_plan`、`final_answer` 方便在 Prompt 内显式标注思考及总结步骤。

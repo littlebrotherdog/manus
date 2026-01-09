@@ -68,7 +68,7 @@ manus chat --task "列出 Manus 的关键组件"
 streamlit run manus/app/streamlit_app.py
 ```
 
-界面会实时输出计划、每一步工具内容与最终回答，并在侧栏调整模型、步数、temperature。
+界面会实时输出计划、每一步工具内容与最终回答，并在侧栏调整模型、步数、temperature。模型下拉预置了 10+ 个当前可在 SiliconFlow 直连的主流模型（DeepSeek-R1/V3、Qwen2.5/3 系列、MiniMax-M1-80k、GLM-4-32B 等），也可手动输入自定义 ID。
 
 ### 内置工具一览
 
@@ -80,7 +80,7 @@ Manus 默认加载 `LocalSearchTool`、`CalculatorTool` 以及 `manus.tools.func
 | `calculator` | 安全计算 | 仅允许 `+ - * / % **` 等节点，并自动提取句子里的算式。 |
 | `get_temperature_and_windspeed` | 天气查询 | 根据城市字符串生成确定性温度/风速，方便测试。 |
 | `generate_image` | 图片生成占位 | 返回 `fake-image://{seed}` 供前端展示。 |
-| `web_search`/`search`/`batch_search` | 检索 | 复用本地检索实现，满足单条或批量查询。 |
+| `web_search`/`qwen_search`/`search`/`batch_search` | 检索 | 复用本地检索实现，满足单条或批量查询（`search` 为本地别名，`qwen_search` 可兼容 Qwen 风格工具调用）。 |
 | `parse_file` | 文件读取 | 只允许访问仓库根目录下的文件，可通过 `max_chars` 控制长度。 |
 | `execute_python` / `python` / `PythonInterpreter` | 代码执行 | 在受限内置函数环境中执行脚本，返回 `stdout` 与 `result`。 |
 | `memory` | 长期记忆 | 简单把上下文写入 `_GLOBAL_MEMORY`，可根据需要替换。 |
